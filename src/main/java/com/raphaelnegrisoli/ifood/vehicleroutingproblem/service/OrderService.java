@@ -1,10 +1,15 @@
 package com.raphaelnegrisoli.ifood.vehicleroutingproblem.service;
 
+import com.raphaelnegrisoli.ifood.vehicleroutingproblem.controller.dto.OrderSearchDTO;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.repository.OrderRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -24,4 +29,14 @@ public class OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
     }
 
+    public List<Order> find(final OrderSearchDTO orderSearchDTO) {
+
+        final Specification<Order> restaurantSpecification = (root, criteriaQuery, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("restaurant").get("id"), orderSearchDTO.getRestaurantId());
+        final Specification<Order> deliverySpecification = (root, criteriaQuery, criteriaBuilder) ->
+                criteriaBuilder.between(root.get("delivery"), orderSearchDTO.getDeliveryBegin(),
+                orderSearchDTO.getDeliveryEnd());
+
+        return orderRepository.findAll(restaurantSpecification.and(deliverySpecification));
+    }
 }
