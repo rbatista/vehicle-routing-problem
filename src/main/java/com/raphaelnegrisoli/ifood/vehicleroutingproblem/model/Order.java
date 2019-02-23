@@ -4,18 +4,17 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@Table(name = "orders")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany
-    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false)
     private Restaurant restaurant;
 
-    @OneToMany
-    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false)
     private Client client;
 
     @Temporal(TemporalType.TIMESTAMP)

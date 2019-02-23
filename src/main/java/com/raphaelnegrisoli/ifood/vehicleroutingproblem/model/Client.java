@@ -10,6 +10,7 @@ import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "clients")
 public class Client {
 
     @Id
