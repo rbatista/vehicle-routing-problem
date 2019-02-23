@@ -1,8 +1,10 @@
 package com.raphaelnegrisoli.ifood.vehicleroutingproblem.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.beans.Transient;
 import java.util.Date;
 
 public class OrderSearchDTO {
@@ -37,6 +39,11 @@ public class OrderSearchDTO {
 
     public void setDeliveryEnd(final Date deliveryEnd) {
         this.deliveryEnd = deliveryEnd;
+    }
+
+    @JsonIgnore
+    public Boolean hasDeliveryRange() {
+        return deliveryBegin != null && deliveryEnd != null;
     }
 
     @Override
