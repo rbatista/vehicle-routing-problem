@@ -63,15 +63,17 @@ public class Router {
         return routePlan;
     }
 
-    private List<Order> calculateRoute(final List<Order> route, final Location source, final Long elapsedTime, final Set<Order> orders) {
+    private List<Order> calculateRoute(final List<Order> route, final Location source, final Long elapsedTimeInMinutes, final Set<Order> remaining) {
 
-        if (orders.isEmpty()) {
-            return Collections.emptyList();
+        LOGGER.debug("Calculate route for orders: {}. Current route: {}", remaining.stream().map(Order::getId).collect(Collectors.toList()), route.stream().map(Order::getId).collect(Collectors.toList()));
+        if (remaining.isEmpty() || route.size() >= maxOrdersByRoute) {
+            LOGGER.debug("Route calculated");
+            return route;
         }
 
         Order next = null;
         BigDecimal minDistance = BigDecimal.ZERO;
-        for (final Order order : orders) {
+        for (final Order order : remaining) {
             final BigDecimal orderDistance = calculateDistance(source, order.getClient());
             if (next == null || minDistance.compareTo(orderDistance) > 0) {
                 minDistance = orderDistance;
@@ -80,7 +82,7 @@ public class Router {
             }
         }
 
-        final long currentTime = calculateDeliveryTime(minDistance) + elapsedTime;
+        final long currentTime = calculateDeliveryTime(minDistance) + elapsedTimeInMinutes;
 
         final LocalDateTime pickup = LocalDateTime.ofInstant(next.getPickup().toInstant(), ZoneId.of("America/Sao_Paulo"));
         final LocalDateTime delivery = LocalDateTime.ofInstant(next.getDelivery().toInstant(), ZoneId.of("America/Sao_Paulo"));
@@ -91,8 +93,8 @@ public class Router {
         } else {
             LOGGER.info("Add order {} to current route. distance: {}, actualTime: {}", next.getId(), minDistance, currentTime);
             route.add(next);
-            orders.remove(next);
-            return calculateRoute(route, next.getClient().getLocation(), currentTime, orders);
+            remaining.remove(next);
+            return calculateRoute(route, next.getClient().getLocation(), currentTime, remaining);
         }
     }
 

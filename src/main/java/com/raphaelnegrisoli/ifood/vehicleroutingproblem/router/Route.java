@@ -18,6 +18,14 @@ public class Route {
         this.orders = orders;
     }
 
+    public Restaurant getRestaurant() {
+        return restaurant;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
