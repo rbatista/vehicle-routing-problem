@@ -5,9 +5,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "restaurants")
@@ -17,15 +14,8 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @DecimalMin("-180.0")
-    @DecimalMax("180.0")
-    @Column(precision = 10, scale = 7)
-    private BigDecimal longitude;
-
-    @DecimalMin("-85.05112878")
-    @DecimalMax("85.05112878")
-    @Column(precision = 10, scale = 7)
-    private BigDecimal latitude;
+    @Embedded
+    private Location location;
 
     public Integer getId() {
         return id;
@@ -35,28 +25,19 @@ public class Restaurant {
         this.id = id;
     }
 
-    public BigDecimal getLatitude() {
-        return latitude;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setLatitude(final BigDecimal latitude) {
-        this.latitude = latitude;
-    }
-
-    public BigDecimal getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(final BigDecimal longitude) {
-        this.longitude = longitude;
+    public void setLocation(final Location location) {
+        this.location = location;
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
-                .append("latitude", latitude)
-                .append("longitude", longitude)
+                .append("location", location)
                 .toString();
     }
 
@@ -74,8 +55,7 @@ public class Restaurant {
 
         return new EqualsBuilder()
                 .append(id, that.id)
-                .append(latitude, that.latitude)
-                .append(longitude, that.longitude)
+                .append(location, that.location)
                 .isEquals();
     }
 
@@ -83,8 +63,7 @@ public class Restaurant {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(id)
-                .append(latitude)
-                .append(longitude)
+                .append(location)
                 .toHashCode();
     }
 

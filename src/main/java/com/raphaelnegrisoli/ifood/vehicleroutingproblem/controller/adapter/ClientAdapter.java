@@ -18,8 +18,8 @@ public class ClientAdapter {
 
         mapperFactory.classMap(Client.class, ClientDTO.class)
                 .byDefault()
-                .fieldMap("longitude", "lon").add()
-                .fieldMap("latitude", "lat").add()
+                .fieldMap("location.longitude", "lon").add()
+                .fieldMap("location.latitude", "lat").add()
                 .register();
     }
 

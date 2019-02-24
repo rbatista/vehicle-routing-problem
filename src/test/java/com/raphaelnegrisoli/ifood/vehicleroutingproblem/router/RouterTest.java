@@ -2,6 +2,7 @@ package com.raphaelnegrisoli.ifood.vehicleroutingproblem.router;
 
 import com.google.common.collect.Lists;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Client;
+import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Location;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Restaurant;
 import org.junit.Assert;
@@ -21,71 +22,71 @@ import static org.junit.Assert.*;
 public class RouterTest {
 
     @Test
-    @Ignore
-    public void testRoute() throws ParseException {
+    public void testRouteWithTwoPossibleOrdersOptimization() throws ParseException {
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         final Restaurant italianRestaurantFaustoFerraz = new Restaurant();
-        italianRestaurantFaustoFerraz.setLongitude(new BigDecimal("-23.565697"));
-        italianRestaurantFaustoFerraz.setLatitude(new BigDecimal("-46.646517"));
+        italianRestaurantFaustoFerraz.setLocation(new Location.Builder("-23.565697", "-46.646517").build());
+
+        final Restaurant chineseRestaurantTutoia = new Restaurant();
+        chineseRestaurantTutoia.setLocation(new Location.Builder("-23.573794", "-46.651223").build());
 
         final Client clientOsasco = new Client();
-        clientOsasco.setLongitude(new BigDecimal("-23.5408414"));
-        clientOsasco.setLatitude(new BigDecimal("-46.7679496"));
+        clientOsasco.setLocation(new Location.Builder("-23.5408414", "-46.7679496").build());
 
         final Client clientTeixeiraDaSilva = new Client();
-        clientTeixeiraDaSilva.setLongitude(new BigDecimal("-23.570143"));
-        clientTeixeiraDaSilva.setLatitude(new BigDecimal("-46.647028"));
+        clientTeixeiraDaSilva.setLocation(new Location.Builder("-23.570143", "-46.647028").build());
 
         final Client clientJoaquimEugenio = new Client();
-        clientJoaquimEugenio.setLongitude(new BigDecimal("-23.566269"));
-        clientJoaquimEugenio.setLatitude(new BigDecimal("-46.651053"));
+        clientJoaquimEugenio.setLocation(new Location.Builder("-23.566269", "-46.651053").build());
 
         final Client clientIbirapuera = new Client();
-        clientIbirapuera.setLongitude(new BigDecimal("-23.5822126"));
-        clientIbirapuera.setLatitude(new BigDecimal("-46.6605502"));
+        clientIbirapuera.setLocation(new Location.Builder("-23.5822126", "-46.6605502").build());
 
         final Client clientAclimacao = new Client();
-        clientAclimacao.setLongitude(new BigDecimal("-23.571706"));
-        clientAclimacao.setLatitude(new BigDecimal("-46.633265"));
+        clientAclimacao.setLocation(new Location.Builder("-23.571706", "-46.633265").build());
 
         final Order orderOsasco = new Order();
+        orderOsasco.setId(1);
         orderOsasco.setRestaurant(italianRestaurantFaustoFerraz);
         orderOsasco.setClient(clientOsasco);
         orderOsasco.setPickup(dateFormat.parse("2019-02-23T18:35:00"));
-        orderOsasco.setDelivery(dateFormat.parse("2019-02-23T19:05:00"));
+        orderOsasco.setDelivery(dateFormat.parse("2019-02-23T19:35:00"));
 
         final Order orderIbirapuera = new Order();
+        orderIbirapuera.setId(2);
         orderIbirapuera.setRestaurant(italianRestaurantFaustoFerraz);
         orderIbirapuera.setClient(clientIbirapuera);
-        orderIbirapuera.setPickup(dateFormat.parse("2019-02-23T18:15:00"));
-        orderIbirapuera.setDelivery(dateFormat.parse("2019-02-23T18:45:00"));
+        orderIbirapuera.setPickup(dateFormat.parse("2019-02-23T18:10:00"));
+        orderIbirapuera.setDelivery(dateFormat.parse("2019-02-23T19:00:00"));
 
         final Order orderJoaquimEugenio = new Order();
+        orderJoaquimEugenio.setId(3);
         orderJoaquimEugenio.setRestaurant(italianRestaurantFaustoFerraz);
         orderJoaquimEugenio.setClient(clientJoaquimEugenio);
         orderJoaquimEugenio.setPickup(dateFormat.parse("2019-02-23T18:20:00"));
-        orderJoaquimEugenio.setDelivery(dateFormat.parse("2019-02-23T18:50:00"));
+        orderJoaquimEugenio.setDelivery(dateFormat.parse("2019-02-23T19:10:00"));
 
         final Order orderTeixeiraDaSilva = new Order();
+        orderTeixeiraDaSilva.setId(4);
         orderTeixeiraDaSilva.setRestaurant(italianRestaurantFaustoFerraz);
         orderTeixeiraDaSilva.setClient(clientTeixeiraDaSilva);
         orderTeixeiraDaSilva.setPickup(dateFormat.parse("2019-02-23T18:17:00"));
-        orderTeixeiraDaSilva.setDelivery(dateFormat.parse("2019-02-23T18:50:00"));
+        orderTeixeiraDaSilva.setDelivery(dateFormat.parse("2019-02-23T19:10:00"));
 
         final Order orderAclimacao = new Order();
-        orderAclimacao.setRestaurant(italianRestaurantFaustoFerraz);
+        orderAclimacao.setId(5);
+        orderAclimacao.setRestaurant(chineseRestaurantTutoia);
         orderAclimacao.setClient(clientAclimacao);
         orderAclimacao.setPickup(dateFormat.parse("2019-02-23T18:20:00"));
-        orderAclimacao.setDelivery(dateFormat.parse("2019-02-23T18:55:00"));
-
+        orderAclimacao.setDelivery(dateFormat.parse("2019-02-23T19:10:00"));
 
         final List<Order> orders = Lists.newArrayList(orderOsasco, orderIbirapuera, orderJoaquimEugenio,
                 orderTeixeiraDaSilva, orderAclimacao);
         final List<Route> routes = new Router().route(orders);
 
-        assertEquals(3, routes.size());
+        assertEquals(4, routes.size());
     }
 
     @Test
@@ -94,16 +95,13 @@ public class RouterTest {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         final Restaurant italianRestaurantFaustoFerraz = new Restaurant();
-        italianRestaurantFaustoFerraz.setLongitude(new BigDecimal("-23.565697"));
-        italianRestaurantFaustoFerraz.setLatitude(new BigDecimal("-46.646517"));
+        italianRestaurantFaustoFerraz.setLocation(new Location.Builder("-23.565697", "-46.646517").build());
 
         final Restaurant chineseRestaurantTutoia = new Restaurant();
-        chineseRestaurantTutoia.setLongitude(new BigDecimal("-23.573794"));
-        chineseRestaurantTutoia.setLatitude(new BigDecimal("-46.651223"));
+        chineseRestaurantTutoia.setLocation(new Location.Builder("-23.573794", "-46.651223").build());
 
         final Client clientIbirapuera = new Client();
-        clientIbirapuera.setLongitude(new BigDecimal("-23.5822126"));
-        clientIbirapuera.setLatitude(new BigDecimal("-46.6605502"));
+        clientIbirapuera.setLocation(new Location.Builder("-23.5822126", "-46.6605502").build());
 
         final Order orderItalian = new Order();
         orderItalian.setRestaurant(italianRestaurantFaustoFerraz);

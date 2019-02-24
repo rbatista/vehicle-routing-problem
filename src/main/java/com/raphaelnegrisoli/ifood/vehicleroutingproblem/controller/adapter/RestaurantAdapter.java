@@ -18,8 +18,8 @@ public class RestaurantAdapter {
 
         mapperFactory.classMap(Restaurant.class, RestaurantDTO.class)
                 .byDefault()
-                .fieldMap("longitude", "lon").add()
-                .fieldMap("latitude", "lat").add()
+                .fieldMap("location.longitude", "lon").add()
+                .fieldMap("location.latitude", "lat").add()
                 .register();
     }
 

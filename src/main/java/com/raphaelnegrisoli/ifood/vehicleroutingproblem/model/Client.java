@@ -5,9 +5,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "clients")
@@ -17,15 +14,8 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @DecimalMin("-180.0")
-    @DecimalMax("180.0")
-    @Column(precision = 10, scale = 7)
-    private BigDecimal longitude;
-
-    @DecimalMin("-85.05112878")
-    @DecimalMax("85.05112878")
-    @Column(precision = 10, scale = 7)
-    private BigDecimal latitude;
+    @Embedded
+    private Location location;
 
     public Integer getId() {
         return id;
@@ -35,20 +25,12 @@ public class Client {
         this.id = id;
     }
 
-    public BigDecimal getLongitude() {
-        return longitude;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setLongitude(final BigDecimal longitude) {
-        this.longitude = longitude;
-    }
-
-    public BigDecimal getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(final BigDecimal latitude) {
-        this.latitude = latitude;
+    public void setLocation(final Location location) {
+        this.location = location;
     }
 
     @Override
@@ -65,8 +47,7 @@ public class Client {
 
         return new EqualsBuilder()
                 .append(id, client.id)
-                .append(longitude, client.longitude)
-                .append(latitude, client.latitude)
+                .append(location, client.location)
                 .isEquals();
     }
 
@@ -74,8 +55,7 @@ public class Client {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(id)
-                .append(longitude)
-                .append(latitude)
+                .append(location)
                 .toHashCode();
     }
 
@@ -83,8 +63,7 @@ public class Client {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
-                .append("longitude", longitude)
-                .append("latitude", latitude)
+                .append("location", location)
                 .toString();
     }
 

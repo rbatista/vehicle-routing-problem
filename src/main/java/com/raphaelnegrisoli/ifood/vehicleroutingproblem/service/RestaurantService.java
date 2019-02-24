@@ -26,8 +26,7 @@ public class RestaurantService {
 
     public Restaurant update(final Restaurant restaurant) {
         final Restaurant persistedRestaurant = find(restaurant.getId());
-        persistedRestaurant.setLatitude(restaurant.getLatitude());
-        persistedRestaurant.setLongitude(restaurant.getLongitude());
+        persistedRestaurant.setLocation(restaurant.getLocation());
         return restaurantRepository.save(persistedRestaurant);
     }
 

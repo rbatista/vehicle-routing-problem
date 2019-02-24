@@ -26,8 +26,7 @@ public class ClientService {
 
     public Client update(final Client client) {
         final Client persistedClient = find(client.getId());
-        persistedClient.setLatitude(client.getLatitude());
-        persistedClient.setLongitude(client.getLongitude());
+        persistedClient.setLocation(client.getLocation());
         return clientRepository.save(persistedClient);
     }
 
