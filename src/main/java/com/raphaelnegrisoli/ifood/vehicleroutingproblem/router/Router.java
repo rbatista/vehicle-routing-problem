@@ -20,6 +20,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class Router {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Router.class);
+    public static final String DEFAULT_TIMEZONE_ID = "America/Sao_Paulo";
 
     private final DistanceCalculator distanceCalculator = new DistanceCalculator();
 
@@ -71,39 +72,54 @@ public class Router {
             return route;
         }
 
-        Order next = null;
+        final Order next = findNearest(source, remaining);
+        final BigDecimal distanceKm = distanceCalculator.calculateDistanceInKm(source, next.getClient().getLocation());
+        final long currentRouteTime = calculateDeliveryTimeByKmInMinutes(distanceKm) + elapsedTimeInMinutes;
+
+        if (route.isEmpty() || isOrderFeasibleToBeAddedToRoute(next, currentRouteTime)) {
+            LOGGER.info("Add order {} to current route. distance: {}, actualTime: {}", next.getId(), distanceKm,
+                    currentRouteTime);
+            route.add(next);
+            remaining.remove(next);
+            return calculateRoute(route, next.getClient().getLocation(), currentRouteTime, remaining);
+        } else {
+            LOGGER.info("Time is not enough to delivery order {} in the current route: currentTime: {}", next,
+                    currentRouteTime);
+            return route;
+        }
+    }
+
+    private Order findNearest(final Location source, final Set<Order> orders) {
+        Order closest = null;
         BigDecimal minDistance = BigDecimal.ZERO;
-        for (final Order order : remaining) {
+        for (final Order order : orders) {
             final BigDecimal orderDistance = calculateDistance(source, order.getClient());
-            if (next == null || minDistance.compareTo(orderDistance) > 0) {
+            if (closest == null || minDistance.compareTo(orderDistance) > 0) {
                 minDistance = orderDistance;
-                next = order;
+                closest = order;
                 LOGGER.debug("new min distance: Order {} distance {}", order.getId(), minDistance);
             }
         }
 
-        final long currentTime = calculateDeliveryTime(minDistance) + elapsedTimeInMinutes;
-
-        final LocalDateTime pickup = LocalDateTime.ofInstant(next.getPickup().toInstant(), ZoneId.of("America/Sao_Paulo"));
-        final LocalDateTime delivery = LocalDateTime.ofInstant(next.getDelivery().toInstant(), ZoneId.of("America/Sao_Paulo"));
-        if (!route.isEmpty() && pickup.plusMinutes(currentTime).isAfter(delivery)) {
-            LOGGER.info("Time is not enough to delivery order {} in the current route: pickup: {}, currentTime: {}, delivery: {}",
-                    next.getId(), pickup, currentTime, delivery);
-            return route;
-        } else {
-            LOGGER.info("Add order {} to current route. distance: {}, actualTime: {}", next.getId(), minDistance, currentTime);
-            route.add(next);
-            remaining.remove(next);
-            return calculateRoute(route, next.getClient().getLocation(), currentTime, remaining);
-        }
-    }
-
-    private long calculateDeliveryTime(final BigDecimal distance) {
-        return distance.multiply(new BigDecimal(5)).divide(driverSpeed, BigDecimal.ROUND_UP).longValue();
+        return closest;
     }
 
     private BigDecimal calculateDistance(final Location source, final Client client) {
         return distanceCalculator.calculateDistanceInKm(source, client.getLocation());
     }
 
+    private long calculateDeliveryTimeByKmInMinutes(final BigDecimal distance) {
+        return distance.multiply(new BigDecimal(5)).divide(driverSpeed, BigDecimal.ROUND_UP).longValue();
+    }
+
+    private boolean isOrderFeasibleToBeAddedToRoute(final Order order, final long currentRouteTime) {
+        final LocalDateTime pickup = toLocalDate(order.getPickup());
+        final LocalDateTime delivery = toLocalDate(order.getDelivery());
+
+        return !pickup.plusMinutes(currentRouteTime).isAfter(delivery);
+    }
+
+    private LocalDateTime toLocalDate(final Date pickup) {
+        return LocalDateTime.ofInstant(pickup.toInstant(), ZoneId.of(DEFAULT_TIMEZONE_ID));
+    }
 }

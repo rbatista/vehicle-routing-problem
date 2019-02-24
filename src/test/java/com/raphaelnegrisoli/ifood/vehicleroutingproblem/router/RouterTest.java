@@ -1,7 +1,6 @@
 package com.raphaelnegrisoli.ifood.vehicleroutingproblem.router;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Client;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Location;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
@@ -11,9 +10,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
@@ -139,7 +136,6 @@ public class RouterTest {
         System.out.println(result);
         assertEquals(2, result.size());
 
-        final Set<Integer> firstRouteIds = Sets.newHashSet(1, 2, 3);
         assertEquals(3, result.get(0).getOrders().size());
         assertEquals(1, result.get(1).getOrders().size());
     }
