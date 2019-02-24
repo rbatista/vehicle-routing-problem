@@ -1,5 +1,9 @@
 package com.raphaelnegrisoli.ifood.vehicleroutingproblem.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -63,4 +67,46 @@ public class Order {
         this.delivery = delivery;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final Order order = (Order) o;
+
+        return new EqualsBuilder()
+                .append(id, order.id)
+                .append(restaurant, order.restaurant)
+                .append(client, order.client)
+                .append(pickup, order.pickup)
+                .append(delivery, order.delivery)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(restaurant)
+                .append(client)
+                .append(pickup)
+                .append(delivery)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("restaurant", restaurant)
+                .append("client", client)
+                .append("pickup", pickup)
+                .append("delivery", delivery)
+                .toString();
+    }
 }

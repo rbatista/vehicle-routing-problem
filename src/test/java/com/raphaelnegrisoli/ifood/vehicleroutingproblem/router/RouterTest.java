@@ -4,19 +4,24 @@ import com.google.common.collect.Lists;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Client;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Restaurant;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 public class RouterTest {
 
     @Test
+    @Ignore
     public void testRoute() throws ParseException {
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -81,6 +86,39 @@ public class RouterTest {
         final List<Route> routes = new Router().route(orders);
 
         assertEquals(3, routes.size());
+    }
+
+    @Test
+    public void testRouteOneByRestaurant() throws Exception {
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+        final Restaurant italianRestaurantFaustoFerraz = new Restaurant();
+        italianRestaurantFaustoFerraz.setLongitude(new BigDecimal("-23.565697"));
+        italianRestaurantFaustoFerraz.setLatitude(new BigDecimal("-46.646517"));
+
+        final Restaurant chineseRestaurantTutoia = new Restaurant();
+        chineseRestaurantTutoia.setLongitude(new BigDecimal("-23.573794"));
+        chineseRestaurantTutoia.setLatitude(new BigDecimal("-46.651223"));
+
+        final Client clientIbirapuera = new Client();
+        clientIbirapuera.setLongitude(new BigDecimal("-23.5822126"));
+        clientIbirapuera.setLatitude(new BigDecimal("-46.6605502"));
+
+        final Order orderItalian = new Order();
+        orderItalian.setRestaurant(italianRestaurantFaustoFerraz);
+        orderItalian.setClient(clientIbirapuera);
+        orderItalian.setPickup(dateFormat.parse("2019-02-23T18:15:00"));
+        orderItalian.setDelivery(dateFormat.parse("2019-02-23T18:45:00"));
+
+        final Order orderChinese = new Order();
+        orderChinese.setRestaurant(chineseRestaurantTutoia);
+        orderChinese.setClient(clientIbirapuera);
+        orderChinese.setPickup(dateFormat.parse("2019-02-23T18:15:00"));
+        orderChinese.setDelivery(dateFormat.parse("2019-02-23T18:45:00"));
+
+        final List<Route> result = new Router().route(asList(orderItalian, orderChinese));
+        Assert.assertEquals(2, result.size());
     }
 
 }
