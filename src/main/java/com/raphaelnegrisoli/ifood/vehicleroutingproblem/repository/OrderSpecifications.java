@@ -40,4 +40,9 @@ public final class OrderSpecifications {
                 criteriaBuilder.between(root.get("delivery"), begin, end);
     }
 
+    public static Specification<Order> routeIsPending(){
+        return (root, criteriaQuery, criteriaBuilder) ->
+                criteriaBuilder.isFalse(root.get("routed"));
+    }
+
 }

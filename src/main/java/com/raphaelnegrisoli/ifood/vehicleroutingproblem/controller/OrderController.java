@@ -7,7 +7,6 @@ import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,7 +31,7 @@ public class OrderController {
     @PostMapping
     public OrderDTO create(@Valid @RequestBody final OrderDTO dto) {
         final Order request = orderAdapter.adapt(dto);
-        final Order created = orderService.create(request);
+        final Order created = orderService.save(request);
         return orderAdapter.adapt(created);
     }
 

@@ -2,6 +2,7 @@ package com.raphaelnegrisoli.ifood.vehicleroutingproblem.service;
 
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.controller.dto.OrderSearchDTO;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
+import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.OrderStatus;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.repository.OrderRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.raphaelnegrisoli.ifood.vehicleroutingproblem.repository.OrderSpecifications.*;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 public class OrderService {
@@ -21,8 +23,8 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
-    public Order create(final Order client) {
-        return orderRepository.save(client);
+    public Order save(final Order order) {
+        return orderRepository.save(order);
     }
 
     public Order find(final Integer id) {
@@ -44,4 +46,7 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Choose some filter"));
     }
 
+    public List<Order> findPendingRouting() {
+        return orderRepository.findAll(where(routeIsPending()));
+    }
 }

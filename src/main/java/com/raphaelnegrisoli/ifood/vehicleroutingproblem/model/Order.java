@@ -27,6 +27,8 @@ public class Order {
     @Temporal(TemporalType.TIMESTAMP)
     private Date delivery;
 
+    private Boolean routed = false;
+
     public Integer getId() {
         return id;
     }
@@ -65,6 +67,14 @@ public class Order {
 
     public void setDelivery(final Date delivery) {
         this.delivery = delivery;
+    }
+
+    public Boolean getRouted() {
+        return routed;
+    }
+
+    public void setRouted(final Boolean routed) {
+        this.routed = routed;
     }
 
     @Override
