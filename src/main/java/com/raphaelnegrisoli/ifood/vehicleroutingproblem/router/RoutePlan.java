@@ -6,6 +6,7 @@ import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,10 +20,10 @@ public class RoutePlan {
 
     public RoutePlan(final Location currentLocation, final Set<Order> remainingOrders) {
         this.currentLocation = currentLocation;
-        this.remainingOrders = remainingOrders;
+        this.remainingOrders = new HashSet<>(remainingOrders);
     }
 
-    public boolean hasRemaining() {
+    public boolean hasRemainingOrders() {
         return !remainingOrders.isEmpty();
     }
 
@@ -56,11 +57,11 @@ public class RoutePlan {
         this.elapsedTime = elapsedTime;
     }
 
-    public Order findNearest() {
+    public Order findNearestFromCurrentLocation() {
         Order closest = null;
         BigDecimal minDistance = BigDecimal.ZERO;
         for (final Order order : remainingOrders) {
-            final BigDecimal orderDistance = calculateDistance(order.getClient());
+            final BigDecimal orderDistance = calculateDistanceFromCurrentLocation(order.getClient());
             if (closest == null || minDistance.compareTo(orderDistance) > 0) {
                 minDistance = orderDistance;
                 closest = order;
@@ -70,7 +71,7 @@ public class RoutePlan {
         return closest;
     }
 
-    private BigDecimal calculateDistance(final Client client) {
+    private BigDecimal calculateDistanceFromCurrentLocation(final Client client) {
         return distanceCalculator.calculateDistanceInKm(currentLocation, client.getLocation());
     }
 
@@ -78,8 +79,8 @@ public class RoutePlan {
         return currentLocation;
     }
 
-    public BigDecimal calculateDistance(final Order order) {
-        return calculateDistance(order.getClient());
+    public BigDecimal calculateDistanceFromCurrentLocation(final Order order) {
+        return calculateDistanceFromCurrentLocation(order.getClient());
     }
 
 }

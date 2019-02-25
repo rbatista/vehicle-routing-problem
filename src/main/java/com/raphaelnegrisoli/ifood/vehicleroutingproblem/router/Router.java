@@ -1,8 +1,6 @@
 package com.raphaelnegrisoli.ifood.vehicleroutingproblem.router;
 
 import com.google.common.graph.MutableValueGraph;
-import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Client;
-import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Location;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Order;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Restaurant;
 import org.slf4j.Logger;
@@ -19,9 +17,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class Router {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Router.class);
-    public static final String DEFAULT_TIMEZONE_ID = "America/Sao_Paulo";
-
-    private final DistanceCalculator distanceCalculator = new DistanceCalculator();
+    private static final String DEFAULT_TIMEZONE_ID = "America/Sao_Paulo";
 
     private final Integer maxOrdersByRoute;
 
@@ -52,7 +48,6 @@ public class Router {
     private List<Route> routePlanByRestaurant(final Restaurant restaurant, final List<Order> orders) {
 
         final List<Route> routePlan = new ArrayList<>();
-
         final Set<Order> remaining = new HashSet<>(orders);
         while (!remaining.isEmpty()) {
             final RoutePlan plan = new RoutePlan(restaurant.getLocation(), remaining);
@@ -66,29 +61,32 @@ public class Router {
 
     private List<Order> calculateRoute(final RoutePlan plan) {
 
-        while (plan.hasRemaining()) {
+        while (plan.hasRemainingOrders()) {
             if (plan.size() >= maxOrdersByRoute) {
-                LOGGER.debug("Route calculated");
+                LOGGER.debug("Route reached the maximum");
                 break;
             }
 
-            final Order next = plan.findNearest();
-            final BigDecimal distanceKm = plan.calculateDistance(next);
-            final long currentRouteTime = calculateDeliveryTimeByKmInMinutes(distanceKm) + plan.getElapsedTime();
+            final Order next = plan.findNearestFromCurrentLocation();
+            final long nextElapsedTime = calculateElapsedTimeForOrder(plan, next);
 
-            if (plan.isEmpty() || isOrderFeasibleToBeAddedToRoute(next, currentRouteTime)) {
-                LOGGER.info("Add order {} to current route. distance: {}, actualTime: {}", next.getId(), distanceKm,
-                        currentRouteTime);
+            if (plan.isEmpty() || isOrderFeasibleToBeAddedToRoute(next, nextElapsedTime)) {
+                LOGGER.info("Add order {} to current route. actualTime: {}", next.getId(), nextElapsedTime);
                 plan.add(next);
-                plan.setElapsedTime(currentRouteTime);
+                plan.setElapsedTime(nextElapsedTime);
             } else {
                 LOGGER.info("Time is not enough to delivery order {} in the current route: currentTime: {}", next,
-                        currentRouteTime);
+                        nextElapsedTime);
                 break;
             }
         }
 
         return plan.getRoutes();
+    }
+
+    private long calculateElapsedTimeForOrder(final RoutePlan plan, final Order next) {
+        final BigDecimal distanceKm = plan.calculateDistanceFromCurrentLocation(next);
+        return calculateDeliveryTimeByKmInMinutes(distanceKm) + plan.getElapsedTime();
     }
 
     private long calculateDeliveryTimeByKmInMinutes(final BigDecimal distance) {
@@ -105,4 +103,5 @@ public class Router {
     private LocalDateTime toLocalDate(final Date pickup) {
         return LocalDateTime.ofInstant(pickup.toInstant(), ZoneId.of(DEFAULT_TIMEZONE_ID));
     }
+
 }
