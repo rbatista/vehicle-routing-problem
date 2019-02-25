@@ -7,6 +7,7 @@ import com.raphaelnegrisoli.ifood.vehicleroutingproblem.router.Route;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.router.Router;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.service.OrderService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +26,7 @@ public class RouterPlanController {
         this.routerPlanAdapter = routerPlanAdapter;
     }
 
-    @GetMapping
+    @PostMapping
     public RoutePlanDTO route() {
 
         final List<Order> routePendingOrders = orderService.findPendingRouting();
