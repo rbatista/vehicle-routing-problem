@@ -1,6 +1,5 @@
 package com.raphaelnegrisoli.ifood.vehicleroutingproblem.router;
 
-import com.google.common.collect.Lists;
 import com.google.common.graph.MutableValueGraph;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Client;
 import com.raphaelnegrisoli.ifood.vehicleroutingproblem.model.Location;
@@ -56,7 +55,8 @@ public class Router {
 
         final Set<Order> remaining = new HashSet<>(orders);
         while (!remaining.isEmpty()) {
-            final List<Order> route = calculateRoute(Lists.newArrayList(), restaurant.getLocation(), 0L, remaining);
+            final RoutePlan plan = new RoutePlan(restaurant.getLocation(), remaining);
+            final List<Order> route = calculateRoute(plan);
             routePlan.add(new Route(restaurant, route));
             route.forEach(remaining::remove);
         }
@@ -64,48 +64,31 @@ public class Router {
         return routePlan;
     }
 
-    private List<Order> calculateRoute(final List<Order> route, final Location source, final Long elapsedTimeInMinutes, final Set<Order> remaining) {
+    private List<Order> calculateRoute(final RoutePlan plan) {
 
-        LOGGER.debug("Calculate route for orders: {}. Current route: {}", remaining.stream().map(Order::getId).collect(Collectors.toList()), route.stream().map(Order::getId).collect(Collectors.toList()));
-        if (remaining.isEmpty() || route.size() >= maxOrdersByRoute) {
-            LOGGER.debug("Route calculated");
-            return route;
-        }
+        while (plan.hasRemaining()) {
+            if (plan.size() >= maxOrdersByRoute) {
+                LOGGER.debug("Route calculated");
+                break;
+            }
 
-        final Order next = findNearest(source, remaining);
-        final BigDecimal distanceKm = distanceCalculator.calculateDistanceInKm(source, next.getClient().getLocation());
-        final long currentRouteTime = calculateDeliveryTimeByKmInMinutes(distanceKm) + elapsedTimeInMinutes;
+            final Order next = plan.findNearest();
+            final BigDecimal distanceKm = plan.calculateDistance(next);
+            final long currentRouteTime = calculateDeliveryTimeByKmInMinutes(distanceKm) + plan.getElapsedTime();
 
-        if (route.isEmpty() || isOrderFeasibleToBeAddedToRoute(next, currentRouteTime)) {
-            LOGGER.info("Add order {} to current route. distance: {}, actualTime: {}", next.getId(), distanceKm,
-                    currentRouteTime);
-            route.add(next);
-            remaining.remove(next);
-            return calculateRoute(route, next.getClient().getLocation(), currentRouteTime, remaining);
-        } else {
-            LOGGER.info("Time is not enough to delivery order {} in the current route: currentTime: {}", next,
-                    currentRouteTime);
-            return route;
-        }
-    }
-
-    private Order findNearest(final Location source, final Set<Order> orders) {
-        Order closest = null;
-        BigDecimal minDistance = BigDecimal.ZERO;
-        for (final Order order : orders) {
-            final BigDecimal orderDistance = calculateDistance(source, order.getClient());
-            if (closest == null || minDistance.compareTo(orderDistance) > 0) {
-                minDistance = orderDistance;
-                closest = order;
-                LOGGER.debug("new min distance: Order {} distance {}", order.getId(), minDistance);
+            if (plan.isEmpty() || isOrderFeasibleToBeAddedToRoute(next, currentRouteTime)) {
+                LOGGER.info("Add order {} to current route. distance: {}, actualTime: {}", next.getId(), distanceKm,
+                        currentRouteTime);
+                plan.add(next);
+                plan.setElapsedTime(currentRouteTime);
+            } else {
+                LOGGER.info("Time is not enough to delivery order {} in the current route: currentTime: {}", next,
+                        currentRouteTime);
+                break;
             }
         }
 
-        return closest;
-    }
-
-    private BigDecimal calculateDistance(final Location source, final Client client) {
-        return distanceCalculator.calculateDistanceInKm(source, client.getLocation());
+        return plan.getRoutes();
     }
 
     private long calculateDeliveryTimeByKmInMinutes(final BigDecimal distance) {
